@@ -1,6 +1,5 @@
 const ShortUrl = require('../models/shortUrl');
-
-
+var ip = require('ip');
 const generateShort = async (req,res)=>{
     {
         try {
@@ -42,7 +41,13 @@ const redirectShort = async (req, res) => {
             return res.status(200).json({ error: 'This url currently unavailable' });
         }
         shortUrl.count = shortUrl.count+1;
+        var ipAddress = ip.address();
+        var timeInMss = Date.now();
+        const newVisit = { ip: ipAddress, time: new Date(timeInMss) };
+
+        shortUrl.visits.push(newVisit);
         shortUrl.save();
+
         res.redirect(shortUrl.full);
     } catch (error) {
         console.error('Error redirecting short URL:', error);

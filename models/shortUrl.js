@@ -24,7 +24,13 @@ const shortUrlSchema = new mongoose.Schema({
     count : {
         type : Number,
         default: 0,
-    }
+    },
+    visits: [
+        {
+          ip: { type: String },
+          time: { type: Date, default: Date.now }
+        }
+      ]
 
 },
 { versionKey: false }
