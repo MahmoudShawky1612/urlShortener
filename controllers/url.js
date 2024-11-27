@@ -41,7 +41,8 @@ const redirectShort = async (req, res) => {
         if(shortUrl.state === false){
             return res.status(200).json({ error: 'This url currently unavailable' });
         }
-
+        shortUrl.count = shortUrl.count+1;
+        shortUrl.save();
         res.redirect(shortUrl.full);
     } catch (error) {
         console.error('Error redirecting short URL:', error);

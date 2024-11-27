@@ -21,6 +21,10 @@ const shortUrlSchema = new mongoose.Schema({
         required: true,
         default: true,
     },
+    count : {
+        type : Number,
+        default: 0,
+    }
 
 },
 { versionKey: false }
