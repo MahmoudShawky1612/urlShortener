@@ -25,19 +25,21 @@ const generateShort = async (req,res)=>{
 const redirectShort = async (req, res) => {
     try {
         const short = req.params.short;
-        console.log('Short URL parameter:', short);
         
         if (!short) {
-            console.error('Short parameter missing');
             return res.status(400).json({ error: 'short URL required' });
         }
 
         const shortUrl = await ShortUrl.findOne({ short: short });
-        console.log('Database query result:', shortUrl);
 
         if (!shortUrl) {
             console.error('Short URL not found for:', short);
             return res.status(404).json({ error: 'Short URL not found' });
+        }
+        const state = shortUrl.state;
+        console.log(state)
+        if(shortUrl.state === false){
+            return res.status(200).json({ error: 'This url currently unavailable' });
         }
 
         res.redirect(shortUrl.full);
@@ -64,11 +66,35 @@ const getPrevShorts = async(req, res)=>{
 };
 
 
+const urlState = async (req, res)=>{
+    try {
+        const short = req.params.short;
+        const state = req.body.state;
+
+        const shortUrl = await ShortUrl.findOne({short:short});
+        if(!shortUrl){
+            return res.status(404).json({ error: 'Short URL not found' });
+        }
+        if(!state){
+            return res.status(404).json({ error: 'state must not be empty' });
+        }
+        shortUrl.state = state;
+        shortUrl.save();
+
+        return res.status(200).json({ data : shortUrl });
+
+    } catch (error) {
+        return res.status(500).json({ error: error });
+
+    }
+    
+}
+
 
 module.exports = {
 
     generateShort,
     redirectShort,
     getPrevShorts,
-
+    urlState
 }

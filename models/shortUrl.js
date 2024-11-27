@@ -16,6 +16,11 @@ const shortUrlSchema = new mongoose.Schema({
         required: true,
         default: shortId.generate,
     },
+    state : {
+        type:Boolean,
+        required: true,
+        default: true,
+    },
 
 },
 { versionKey: false }
