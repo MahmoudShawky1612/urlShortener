@@ -1,5 +1,8 @@
 const ShortUrl = require('../models/shortUrl');
+const UAParser  = require('ua-parser-js');
 var ip = require('ip');
+
+
 const generateShort = async (req,res)=>{
     {
         try {
@@ -35,18 +38,17 @@ const redirectShort = async (req, res) => {
             console.error('Short URL not found for:', short);
             return res.status(404).json({ error: 'Short URL not found' });
         }
-        const state = shortUrl.state;
-        console.log(state)
-        if(shortUrl.state === false){
-            return res.status(200).json({ error: 'This url currently unavailable' });
-        }
-        shortUrl.count = shortUrl.count+1;
-        var ipAddress = ip.address();
-        var timeInMss = Date.now();
-        const newVisit = { ip: ipAddress, time: new Date(timeInMss) };
 
+        if (shortUrl.state === false) {
+            return res.status(200).json({ error: 'This URL is currently unavailable' });
+        }
+
+        shortUrl.count += 1;
+
+        const newVisit = getClientInfo(req);
         shortUrl.visits.push(newVisit);
-        shortUrl.save();
+
+        await shortUrl.save();
 
         res.redirect(shortUrl.full);
     } catch (error) {
@@ -97,6 +99,26 @@ const urlState = async (req, res)=>{
 }
 
 
+function getClientInfo (req, res){
+    const ipAddress =  ip.address();
+
+        const userAgent = req.headers['user-agent'];
+        const parser = new UAParser();
+        const result = parser.setUA(userAgent).getResult();
+
+        const browserInfo = {
+            browser: result.browser.name,
+            version: result.browser.version,
+            os: result.os.name,
+        };
+
+        const newVisit = {
+            ip: ipAddress,
+            time: new Date(),
+            browserInfo: browserInfo,
+        };
+        return newVisit;
+}
 module.exports = {
 
     generateShort,
@@ -104,3 +126,4 @@ module.exports = {
     getPrevShorts,
     urlState
 }
+
